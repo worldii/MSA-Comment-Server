@@ -2,24 +2,17 @@ package com.example.comment.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.example.comment.domain.Comment;
-import com.example.comment.repository.CommentRepository;
+import com.example.comment.dto.CommentDto;
 
-public class CommentService {
-	@Autowired
-	CommentRepository commentRepository;
-	// 생성
 
-	// 삭제
 
-	// 변경
+public interface CommentService {
+	void createComment(Long postId, Comment comment);
 
-	// 조회
-	// public List<Comment> findAllComments(Long postId) {
-	// 	return CommentRepository.findByPostId(postId);
-	// }
-	//
+	void updateComment(Long commentId, String description);
 
+	void deleteComment(Long commentId);
+
+	List<Comment> findAllComments(Long postId);
 }
