@@ -9,5 +9,5 @@ import com.example.comment.domain.Comment;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long > {
-	List<Comment> findByPostId(Long postId) ;
+	List<Comment> findAllByPostId(Long postId) ;
 }
