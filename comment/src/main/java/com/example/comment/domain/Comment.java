@@ -59,9 +59,11 @@ public class Comment {
 	public void update(String description) {
 		this.description = description;
 	}
+
 	public void increaseLikes() {
 		this.likes = this.likes + 1;
 	}
+
 	public void decreaseLikes() {
 		this.likes = this.likes - 1;
 	}

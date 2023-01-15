@@ -82,7 +82,6 @@ public enum ResultCode {
 	SHARE_POST_SUCCESS(200, "F018", "게시물 DM 공유에 성공하였습니다."),
 	GET_HASHTAG_POSTS_SUCCESS(200, "F019", "해시태그 게시물 목록 페이징 조회 성공"),
 
-
 	// Hashtag
 	GET_HASHTAGS_SUCCESS(200, "H001", "해시태그 목록 페이징 조회에 성공하였습니다."),
 	FOLLOW_HASHTAG_SUCCESS(200, "H002", "해시태그 팔로우에 성공하였습니다."),

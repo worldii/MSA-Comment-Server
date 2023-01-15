@@ -73,10 +73,4 @@ public class CommentController {
 		commentService.deleteCommentLikes(commentId);
 		return ResponseEntity.ok(new ResultResponse(ResultCode.UNLIKE_COMMENT_SUCCESS, ""));
 	}
-
-	// @PostMapping("/comments/mention/{commentId}")
-	// ResponseEntity<ResultResponse> mentionComment(@PathVariable("commmentId") long commentId) {
-	// 	commentService.mentionComment(commentId);
-	// 	return ResponseEntity.ok(new ResultResponse(ResultCode., ""));
-	// }
 }

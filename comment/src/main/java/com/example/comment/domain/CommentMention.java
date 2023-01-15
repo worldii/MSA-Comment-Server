@@ -8,7 +8,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,14 +34,18 @@ public class CommentMention {
 	@JoinColumn(name = "receiver_Id")
 	private User receiver;
 
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "comment_id")
+	private Comment comment;
+
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private LocalDateTime createdAt = LocalDateTime.now();
 
-
 	@Builder
-	public CommentMention(User sender, User receiver){
+	public CommentMention(User sender, User receiver, Comment comment) {
 		this.sender = sender;
 		this.receiver = receiver;
+		this.comment = comment;
 	}
 }

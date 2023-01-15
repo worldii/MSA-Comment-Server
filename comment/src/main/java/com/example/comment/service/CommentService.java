@@ -27,6 +27,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final UserRepository userRepository;
 	private final CommentLikesRepository commentLikesRepository;
+	private final CommentMentionService commentMentionService;
 
 	// 생성
 	@Transactional
@@ -48,10 +49,12 @@ public class CommentService {
 			.postId(postId).build();
 		commentRepository.save(comment);
 
-		// 4.  Hashtag Service 에 저장.
 		// 5.  mention Service 에 멘션함.
-		// 5.  Alarm Service 에 보냄. (Refactor)
+		commentMentionService.mentionMember(tempUser, comment);
 
+		// 6.  Notification Service 에 보냄. (for Refactoring )
+
+		// Response Data 보냄.
 		CommentResponseData commentResponseData = CommentResponseData.builder()
 			.id(comment.getId())
 			.createdAt(comment.getCreatedAt())
@@ -79,6 +82,7 @@ public class CommentService {
 
 		// 3. comments Likes 다 없애야 함. (OK)
 		this.deleteCommentLikesAll(comment);
+		commentMentionService.deleteMentionAll(comment);
 		commentRepository.delete(comment);
 	}
 
@@ -116,7 +120,7 @@ public class CommentService {
 		comment.increaseLikes();
 		CommentLikes commentLikes = CommentLikes.builder().comment(comment).user(tempUser).build();
 		commentLikesRepository.save(commentLikes);
-		// 3. 알람 서비스 보내기. ( Notification refactoring)
+		// 3. Notification 서비스 보내기. ( Notification refactoring)
 	}
 
 	@Transactional
@@ -137,7 +141,7 @@ public class CommentService {
 
 		comment.decreaseLikes();
 		commentLikesRepository.delete(commentLikes);
-		// 3. 알림 보내기 ( to Notification service) -> Refactoring
+		// 3. Notification 보내기 ( to Notification service) -> Refactoring
 	}
 
 	private void deleteCommentLikesAll(Comment comment) {
