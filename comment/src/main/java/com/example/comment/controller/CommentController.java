@@ -1,4 +1,4 @@
-package com.example.comment.Controller;
+package com.example.comment.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,7 +63,7 @@ public class CommentController {
 	}
 
 	@PostMapping("/comments/like/{commentId}")
-	ResponseEntity<ResultResponse>  addCommentLikes(@PathVariable("commentId") long commentId) {
+	ResponseEntity<ResultResponse> addCommentLikes(@PathVariable("commentId") long commentId) {
 		commentService.addCommentLikes(commentId);
 		return ResponseEntity.ok(new ResultResponse(ResultCode.LIKE_COMMENT_SUCCESS, ""));
 	}
@@ -74,15 +74,9 @@ public class CommentController {
 		return ResponseEntity.ok(new ResultResponse(ResultCode.UNLIKE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comments/mention/{commentId}")
-	ResponseEntity<ResultResponse> mentionComment(@PathVariable("commmentId") long commentId) {
-		commentService.mentionComment(commentId);
-		return ResponseEntity.ok(new ResultResponse(ResultCode., ""));
-	}
-	//
-	// @DeleteMapping("/comment/mention/{commentId}")
-	// String unMentionComment(@PathVariable("commentId") long commentId) {
-	// 	commentService.unMentionComment(commentId);
-	// 	return null;
+	// @PostMapping("/comments/mention/{commentId}")
+	// ResponseEntity<ResultResponse> mentionComment(@PathVariable("commmentId") long commentId) {
+	// 	commentService.mentionComment(commentId);
+	// 	return ResponseEntity.ok(new ResultResponse(ResultCode., ""));
 	// }
 }

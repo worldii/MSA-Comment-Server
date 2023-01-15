@@ -116,7 +116,7 @@ public class CommentService {
 		comment.increaseLikes();
 		CommentLikes commentLikes = CommentLikes.builder().comment(comment).user(tempUser).build();
 		commentLikesRepository.save(commentLikes);
-		// 3. 알람 서비스 보내기. (refactoring)
+		// 3. 알람 서비스 보내기. ( Notification refactoring)
 	}
 
 	@Transactional
@@ -137,14 +137,11 @@ public class CommentService {
 
 		comment.decreaseLikes();
 		commentLikesRepository.delete(commentLikes);
-
-		// 3. 알림 보내기 ( to Alarm service) -> Refactoring
+		// 3. 알림 보내기 ( to Notification service) -> Refactoring
 	}
-
 
 	private void deleteCommentLikesAll(Comment comment) {
 		List<CommentLikes> allByComment = commentLikesRepository.findAllByComment(comment);
 		commentLikesRepository.deleteAll(allByComment);
 	}
-
 }
