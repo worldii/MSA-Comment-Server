@@ -8,26 +8,32 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentLikes {
 
 	@Id
 	@GeneratedValue
-	@Column(name="comment_likes_id")
+	@Column(name = "comment_likes_id")
 	private long id;
 
-	@ManyToOne(fetch =  FetchType.LAZY)
-	@JoinColumn(name= "user_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="comment_id")
+	@JoinColumn(name = "comment_id")
 	private Comment comment;
 
-
+	@Builder
+	public CommentLikes(User user, Comment comment) {
+		this.user = user;
+		this.comment = comment;
+	}
 }

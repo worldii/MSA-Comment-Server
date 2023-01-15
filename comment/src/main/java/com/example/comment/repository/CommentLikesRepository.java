@@ -11,7 +11,8 @@ import com.example.comment.domain.CommentLikes;
 import com.example.comment.domain.User;
 
 @Repository
-public interface CommentLikesRepository  extends JpaRepository<CommentLikes, Long> {
+public interface CommentLikesRepository extends JpaRepository<CommentLikes, Long> {
 	Optional<CommentLikes> findByUserAndComment(User user, Comment comment);
+
 	List<CommentLikes> findAllByComment(Comment comment);
 }

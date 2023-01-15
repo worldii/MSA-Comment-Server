@@ -1,78 +1,88 @@
-package com.example.comment.controller;
+package com.example.comment.Controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import javax.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.comment.domain.Comment;
+import com.example.comment.dto.CommentCreateDto;
 import com.example.comment.dto.CommentDto;
+import com.example.comment.dto.CommentResponseData;
+import com.example.comment.dto.ResultCode;
+import com.example.comment.dto.ResultResponse;
 import com.example.comment.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class CommentController {
 	private final CommentService commentService;
 
-	@GetMapping(value = "/comments/{postId}")
-	String getControllerPage(@PathVariable("postId") long postId, Model model) {
+	@GetMapping("/comments/{postId}")
+	public ResponseEntity<ResultResponse> getComments(@PathVariable Long postId) {
 		List<Comment> allComments = commentService.findAllComments(postId);
-		model.addAttribute("allComments", allComments);
-		return "commentPage";
+		List<CommentDto> collect = allComments.stream()
+			.map(comment -> new CommentDto(comment.getId(), comment.getUser(), comment.getDescription(),
+				comment.getLikes()))
+			.collect(
+				Collectors.toList());
+		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_PAGE_SUCCESS, collect));
 	}
 
 	@PostMapping(value = "/comments/{postId}")
-	String createComment(@PathVariable("postId") long postId, @RequestBody CommentDto commentDto)
-	{
-		commentService.createComment(postId, commentDto);
-		return "redirect:/comments/{postId}";
+	public ResponseEntity<ResultResponse> createComment(@PathVariable("postId") Long postId,
+		@RequestBody @Valid CommentCreateDto commentCreateDto) {
+		CommentResponseData responseData = commentService.createComment(postId, commentCreateDto);
+		return ResponseEntity.ok(new ResultResponse(ResultCode.CREATE_COMMENT_SUCCESS, responseData));
 	}
+
 	@DeleteMapping("/comments/{commentId}")
-	String deleteComment(@PathVariable("commentId") long commentId){
+	ResponseEntity<ResultResponse> deleteComment(@PathVariable("commentId") Long commentId) {
 		commentService.deleteComment(commentId);
-		return "redirect:/commentPage";
+		return ResponseEntity.ok(new ResultResponse(ResultCode.DELETE_COMMENT_SUCCESS, ""));
 	}
 
-	@PutMapping("/comment/{commentId}")
-	String updateComment(@PathVariable("commentId") long commentId, String description) {
-		commentService.updateComment(commentId,description);
-		return "redirect:/commentPage";
+	@PutMapping("/comments/{commentId}")
+	ResponseEntity<ResultResponse> updateComment(@PathVariable("commentId") Long commentId,
+		@RequestBody @Valid CommentDto commentDto) {
+		commentService.updateComment(commentId, commentDto);
+		return ResponseEntity.ok(new ResultResponse(ResultCode.UPDATE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comment/like/{commentId}")
-	String addCommentLikes(@PathVariable("commentId") long commentId){
+	@PostMapping("/comments/like/{commentId}")
+	ResponseEntity<ResultResponse>  addCommentLikes(@PathVariable("commentId") long commentId) {
 		commentService.addCommentLikes(commentId);
-		return null;
+		return ResponseEntity.ok(new ResultResponse(ResultCode.LIKE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comment/unlike/{commentId}")
-	String deleteCommentLikes(@PathVariable("commentId") long commentId){
+	@PostMapping("/comments/unlike/{commentId}")
+	ResponseEntity<ResultResponse> deleteCommentLikes(@PathVariable("commentId") long commentId) {
 		commentService.deleteCommentLikes(commentId);
-		return null;
+		return ResponseEntity.ok(new ResultResponse(ResultCode.UNLIKE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comment/mention/{commentId}")
-	String mentionComment(@PathVariable("commmentId") long commentId) {
+	@PostMapping("/comments/mention/{commentId}")
+	ResponseEntity<ResultResponse> mentionComment(@PathVariable("commmentId") long commentId) {
 		commentService.mentionComment(commentId);
-		return null;
+		return ResponseEntity.ok(new ResultResponse(ResultCode., ""));
 	}
-
-	@DeleteMapping("/comment/mention/{commentId}")
-	String unMentionComment(@PathVariable("commentId") long commentId) {
-		commentService.unMentionComment(commentId);
-		return null;
-	}
-
-
+	//
+	// @DeleteMapping("/comment/mention/{commentId}")
+	// String unMentionComment(@PathVariable("commentId") long commentId) {
+	// 	commentService.unMentionComment(commentId);
+	// 	return null;
+	// }
 }
-

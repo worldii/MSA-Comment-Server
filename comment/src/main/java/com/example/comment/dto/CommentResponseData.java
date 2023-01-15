@@ -1,19 +1,19 @@
 package com.example.comment.dto;
 
+import java.time.LocalDateTime;
+
 import com.example.comment.domain.User;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Data
-@AllArgsConstructor
-public class CommentDto {
+@Getter
+@Builder
+public class CommentResponseData {
 	private Long id;
 	private User from;
 	private String description;
-	private int likes;
+	private LocalDateTime createdAt;
 }

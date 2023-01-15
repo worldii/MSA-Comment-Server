@@ -2,8 +2,7 @@ package com.example.comment.exception;
 
 import org.springframework.http.HttpStatus;
 
-public enum CommentExceptionType implements BaseExceptionType
-{
+public enum CommentExceptionType implements BaseExceptionType {
 	NOT_FOUND_COMMENT(602, HttpStatus.OK, "커맨드 정보가 없습니다."),
 	VALUE_MAX_EXCEPTION(602, HttpStatus.OK, "정수 범위를 넘습니다."),
 	VALUE_MIN_EXCEPTION(602, HttpStatus.OK, "정수 범위가 음수입니다.");
@@ -14,8 +13,8 @@ public enum CommentExceptionType implements BaseExceptionType
 	private HttpStatus httpStatus;
 	private String errorMessage;
 
-	 CommentExceptionType(int errorCode , HttpStatus httpStatus, String errorMessage){
-		this.errorCode =errorCode;
+	CommentExceptionType(int errorCode, HttpStatus httpStatus, String errorMessage) {
+		this.errorCode = errorCode;
 		this.httpStatus = httpStatus;
 		this.errorMessage = errorMessage;
 	}
