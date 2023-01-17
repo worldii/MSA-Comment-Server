@@ -1,13 +1,11 @@
 // src/main/frontend/src/App.js
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Comment from "../src/components/Comments/Comment";
-
+import { Route } from 'react-router-dom';
+import CommentList from './components/Comments/CommentList';
 function App() {
-
-
-    // const [hello, setHello] = useState('');
+  // const [hello, setHello] = useState('');
   //
   // useEffect(() => {
   //   axios.get('/api/hello')
@@ -16,10 +14,11 @@ function App() {
   // }, []);
 
   return (
-      <div>
-          <Comment>
-          </Comment>
-      </div>
+    <div>
+      <Route exact path="/comments/:postId">
+        <CommentList></CommentList>
+      </Route>
+    </div>
   );
 }
 
