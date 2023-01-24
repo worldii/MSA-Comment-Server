@@ -90,4 +90,11 @@ public class CommentController {
 
 		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_LIKES_SUCCESS, collect));
 	}
+
+	@GetMapping("/comments/isLiked/{commentId}")
+	ResponseEntity<ResultResponse> getCommentisLikedByUser(@PathVariable ("commentId") long commentId)
+	{
+		boolean result = commentService.checkCommentIsLikedByUser(commentId);
+		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_IS_LIKED_SUCCESS,result));
+	}
 }

@@ -155,5 +155,11 @@ public class CommentService {
 		List<CommentLikes> allByComment = commentLikesRepository.findAllByComment(comment);
 		commentLikesRepository.deleteAll(allByComment);
 	}
+	public boolean checkCommentIsLikedByUser(long commentId)
+	{
+		// user id 알아내서 넣어야 함. -> 지금은 일단 1로
+		boolean present = commentLikesRepository.findByUserIdAndCommentId(1, commentId).isPresent();
+		return present;
+	}
 
 }

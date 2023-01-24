@@ -7,10 +7,12 @@ import Commentlayout from './Commentlayout';
 const CommentList = () => {
   const postId = useParams().postId;
   const [commentList, setCommentList] = useState([]);
-  const [isLiked, setIsLiked] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+
   const refreshComment = async (id) => {
     getDetail();
   };
+
   const getDetail = () => {
     axios.get(`/comments/${postId}`).then((response) => {
       console.log(response.data.data);
@@ -25,8 +27,8 @@ const CommentList = () => {
     });
   }, []);
 
-  const toggleLikeMutation = async (commentId, likes) => {
-    if (likes === 0) {
+  const toggleLikeMutation = async (commentId, isLiked) => {
+    if (isLiked === false) {
       axios.post(`/comments/like/${commentId}`).then((response) => {
         console.log(response);
         getDetail();
@@ -45,6 +47,7 @@ const CommentList = () => {
       getDetail();
     });
   };
+
   return (
     <div>
       <div className={styles.commentListLayout}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from './Commentlayout.module.scss';
 import { CiHeart } from 'react-icons/ci';
 import imageProfile from '../../images/profile.svg';
@@ -6,16 +6,19 @@ import { useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import Modal from 'react-modal';
 import LikesList from '../CommentLikes/LikesList';
-
 import axios from 'axios';
 
 function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
   const description = commentitem.description;
   const user = commentitem.userName;
+  const commentId = commentitem?.id;
   const likes = commentitem.likes;
   const userProfileUrl = commentitem?.profileUrl;
+
+  const [isLiked, setIsLiked] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [likesList, setLikesList] = useState([]);
+
   const showLikesList = async (commentId) => {
     axios.get(`/comments/like/${commentId}`).then((response) => {
       console.log(response.data.data);
@@ -23,6 +26,14 @@ function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
       setModalIsOpen(true);
     });
   };
+
+  useEffect(() => {
+    axios.get(`/comments/isLiked/${commentId}`).then((response) => {
+      console.log(response.data.data);
+      setIsLiked(JSON.parse(response.data.data));
+    });
+  }, [commentId]);
+
   return (
     <div>
       {modalIsOpen && (
@@ -85,10 +96,11 @@ function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
           className={styles.like_box}
           onClick={(e) => {
             e.preventDefault();
-            toggleLikeMutation(commentitem?.id, likes);
+            toggleLikeMutation(commentitem?.id, isLiked);
+            setIsLiked(!isLiked);
           }}
         >
-          <CiHeart size={15} color={likes !== 0 ? '#ff6f8b' : 'gray'} />
+          <CiHeart size={15} color={isLiked === true ? '#ff6f8b' : 'gray'} />
         </div>
       </div>
     </div>
@@ -96,33 +108,3 @@ function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
 }
 
 export default Commentlayout;
-/*
- <div className={styles.writer}>
-        {user.userName} @{user.fullName}
-        <div className={styles.profilePicture}>
-          {userProfileUrl !== undefined ? (
-            <div className={styles.imageDefaultBg}></div>
-          ) : (
-            <img src={userProfileUrl} alt="" />
-          )}
-        </div>
-        <div
-          className={styles.like_box}
-          onClick={(e) => {
-            e.preventDefault();
-            toggleLikeMutation(commentitem?.id, likes);
-          }}
-        >
-          <AiFillHeart size={15} color={likes !== 0 ? '#ff6f8b' : 'gray'} />
-        </div>
-        <div className={styles.likes_list}>likes</div>
-        <div
-          onClick={(e) => {
-            e.preventDefault();
-            deleteFunc(commentitem?.id);
-          }}
-        >
-          <button> Delete</button>
-        </div>
-      </div>
-      <div className={styles.content}>{description}</div>*/
