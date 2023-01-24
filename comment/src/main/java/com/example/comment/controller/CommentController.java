@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.comment.domain.Comment;
+import com.example.comment.domain.CommentLikes;
 import com.example.comment.dto.CommentCreateDto;
 import com.example.comment.dto.CommentDto;
+import com.example.comment.dto.CommentLikesDto;
 import com.example.comment.dto.CommentResponseData;
 import com.example.comment.dto.ResultCode;
 import com.example.comment.dto.ResultResponse;
@@ -34,8 +36,11 @@ public class CommentController {
 	@GetMapping("/comments/{postId}")
 	public ResponseEntity<ResultResponse> getComments(@PathVariable Long postId) {
 		List<Comment> allComments = commentService.findAllComments(postId);
+		for (int i = 0; i < allComments.size(); i++) {
+			log.info("description" + allComments.get(i).getUser().getUserName());
+		}
 		List<CommentDto> collect = allComments.stream()
-			.map(comment -> new CommentDto(comment.getId(), comment.getUser(), comment.getDescription(),
+			.map(comment -> new CommentDto(comment.getId(),comment.getUser().getUserName(), comment.getUser().getProfilePicture(), comment.getDescription(),
 				comment.getLikes()))
 			.collect(
 				Collectors.toList());
@@ -72,5 +77,17 @@ public class CommentController {
 	ResponseEntity<ResultResponse> deleteCommentLikes(@PathVariable("commentId") long commentId) {
 		commentService.deleteCommentLikes(commentId);
 		return ResponseEntity.ok(new ResultResponse(ResultCode.UNLIKE_COMMENT_SUCCESS, ""));
+	}
+
+	@GetMapping("/comments/like/{commentId}")
+	ResponseEntity<ResultResponse> getCommentLikesList(@PathVariable("commentId") long commentId) {
+		List<CommentLikes> commentLikesList = commentService.getCommentLikesList(commentId);
+		List<CommentLikesDto> collect = commentLikesList.stream()
+			.map(comment -> new CommentLikesDto(comment.getUser().getUserName(), comment.getUser().getProfilePicture(),
+				comment.getUser().getFullName()))
+				.collect(
+					Collectors.toList());
+
+		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_LIKES_SUCCESS, collect));
 	}
 }

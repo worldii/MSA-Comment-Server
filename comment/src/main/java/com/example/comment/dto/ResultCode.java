@@ -66,7 +66,6 @@ public enum ResultCode {
 	UNLIKE_COMMENT_SUCCESS(200, "C006", "댓글 좋아요 해제에 성공하였습니다."),
 	MENTION_COMMENT_SUCCESS(200, "C007", "댓글 멘션에 성공하였습니다."),
 	GET_COMMENT_LIKES_SUCCESS(200, "F017", "댓글에 좋아요한 회원 목록 페이지 조회에 성공하였습니다."),
-
 	// POST
 	CREATE_POST_SUCCESS(200, "F001", "게시물 업로드에 성공하였습니다."),
 	DELETE_POST_SUCCESS(200, "F002", "게시물 삭제에 성공하였습니다."),

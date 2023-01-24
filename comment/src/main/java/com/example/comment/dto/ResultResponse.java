@@ -19,5 +19,4 @@ public class ResultResponse<T> {
 		this.message = resultCode.getMessage();
 		this.data = data;
 	}
-
 }

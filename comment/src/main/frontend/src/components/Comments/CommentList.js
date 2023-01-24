@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Comment from './Comment';
-import styles from './Comment.module.scss';
-import Comment2 from './Comment';
+import styles from './CommentList.module.scss';
 import Commentlayout from './Commentlayout';
 const CommentList = () => {
   const postId = useParams().postId;
   const [commentList, setCommentList] = useState([]);
+  const [isLiked, setIsLiked] = useState(0);
   const refreshComment = async (id) => {
     getDetail();
   };
@@ -25,12 +25,36 @@ const CommentList = () => {
     });
   }, []);
 
+  const toggleLikeMutation = async (commentId, likes) => {
+    if (likes === 0) {
+      axios.post(`/comments/like/${commentId}`).then((response) => {
+        console.log(response);
+        getDetail();
+      });
+    } else {
+      axios.post(`/comments/unlike/${commentId}`).then((response) => {
+        console.log(response);
+        getDetail();
+      });
+    }
+  };
+
+  const deleteFunc = async (commentId) => {
+    axios.delete(`/comments/${commentId}`).then((response) => {
+      console.log(response);
+      getDetail();
+    });
+  };
   return (
     <div>
-      <div>
+      <div className={styles.commentListLayout}>
         {commentList.map((item, index) => (
-          <div>
-            <Commentlayout commentitem={item}></Commentlayout>
+          <div key={index}>
+            <Commentlayout
+              commentitem={item}
+              toggleLikeMutation={toggleLikeMutation}
+              deleteFunc={deleteFunc}
+            ></Commentlayout>
           </div>
         ))}
         <Comment postId={postId} refreshfunc={refreshComment}></Comment>

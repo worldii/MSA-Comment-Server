@@ -13,6 +13,6 @@ import com.example.comment.domain.User;
 @Repository
 public interface CommentLikesRepository extends JpaRepository<CommentLikes, Long> {
 	Optional<CommentLikes> findByUserAndComment(User user, Comment comment);
-
+	List<CommentLikes> findAllByCommentId(long commentId);
 	List<CommentLikes> findAllByComment(Comment comment);
 }

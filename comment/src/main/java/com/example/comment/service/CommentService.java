@@ -144,8 +144,16 @@ public class CommentService {
 		// 3. Notification 보내기 ( to Notification service) -> Refactoring
 	}
 
+	public List<CommentLikes> getCommentLikesList(long commentId){
+		List<CommentLikes> allByCommentId = commentLikesRepository.findAllByCommentId(commentId);
+		log.info("좋아요 리스트 "+ allByCommentId);
+
+		return allByCommentId;
+	}
+
 	private void deleteCommentLikesAll(Comment comment) {
 		List<CommentLikes> allByComment = commentLikesRepository.findAllByComment(comment);
 		commentLikesRepository.deleteAll(allByComment);
 	}
+
 }

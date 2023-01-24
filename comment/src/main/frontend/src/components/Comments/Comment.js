@@ -1,5 +1,4 @@
 import React from 'react';
-import Commentlayout from './Commentlayout';
 import styles from './Comment.module.scss';
 import { useState } from 'react';
 import axios from 'axios';
@@ -22,21 +21,22 @@ const Comment = ({ postId, refreshfunc }) => {
       refreshfunc(postId);
     });
   };
+
   return (
     <div>
       <form className={styles.formLayout} onSubmit={onSubmit}>
-        <div className={styles.commentLayout} style={{ marginLeft: '40px' }}>
+        <div className={styles.commentLayout}>
           <textarea
             className={styles.comment}
-            placeholder="댓글을 입력해주세요"
+            placeholder="댓글 달기..."
             onChange={handleClickComment}
             value={comment}
           ></textarea>
           <button className={styles.button} onClick={onSubmit}>
-            등록
+            게시
           </button>
         </div>
-      </form>{' '}
+      </form>
     </div>
   );
 };

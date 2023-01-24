@@ -30,7 +30,7 @@ public class Comment {
 	@Column(name = "comment_id")
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
@@ -41,7 +41,6 @@ public class Comment {
 	private String description;
 
 	private Long postId;
-
 	private int likes;
 
 	@OneToMany(mappedBy = "comment")
