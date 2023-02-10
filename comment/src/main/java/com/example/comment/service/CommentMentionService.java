@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.comment.domain.Comment;
 import com.example.comment.domain.CommentMention;
 import com.example.comment.domain.User;
+import com.example.comment.exception.CustomException;
+import com.example.comment.exception.ErrorCode;
 import com.example.comment.repository.CommentMentionRepository;
 import com.example.comment.repository.UserRepository;
 
@@ -29,9 +31,10 @@ public class CommentMentionService {
 	@Transactional
 	public void mentionMember(User user, Comment comment) {
 		List<String> username = extractUsernameFromString(comment.getDescription());
+		log.info("USERNAME 멘션" + username);
+
 		// Refactoring 해야 함. User Server 에서 가져올 수 있게.
 		List<User> allByUserName = userRepository.findByUserNameIn(username);
-		log.info("USERNAME 멘션" + username);
 
 		for (int i = 0; i < username.size(); i++) {
 			CommentMention commentMention = CommentMention.builder()
@@ -56,7 +59,7 @@ public class CommentMentionService {
 		final Matcher matcher = pattern.matcher(input);
 		while (matcher.find()) {
 			// 존재 여부 판단해야 함 ( from  User Service ) -> Refactoring
-			// userRepository.findByUserName(matcher.group().substring(1)).orElseThrow(()-> new RuntimeException());
+			userRepository.findByUserName(matcher.group().substring(1)).orElseThrow(()->new CustomException(ErrorCode.MENTION_USER_NOT_FOUND));
 			mentions.add(matcher.group().substring(1));
 		}
 		return new ArrayList<>(mentions);

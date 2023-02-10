@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -31,6 +32,7 @@ public class Comment {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@NotNull
 	@JoinColumn(name = "user_id")
 	private User user;
 
@@ -38,8 +40,10 @@ public class Comment {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt = LocalDateTime.now();
 
+	@NotNull
 	private String description;
 
+	@NotNull
 	private Long postId;
 	private int likes;
 
@@ -58,11 +62,9 @@ public class Comment {
 	public void update(String description) {
 		this.description = description;
 	}
-
 	public void increaseLikes() {
 		this.likes = this.likes + 1;
 	}
-
 	public void decreaseLikes() {
 		this.likes = this.likes - 1;
 	}

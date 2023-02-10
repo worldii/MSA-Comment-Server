@@ -10,7 +10,6 @@ import com.example.comment.domain.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	Optional<User> findByUserName(String username);
 	List<User> findByUserNameIn(List<String> username);
-
+	Optional<User> findByUserName(String username);
 }

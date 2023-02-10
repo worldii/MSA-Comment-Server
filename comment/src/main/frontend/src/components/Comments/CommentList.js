@@ -28,13 +28,14 @@ const CommentList = () => {
   }, []);
 
   const toggleLikeMutation = async (commentId, isLiked) => {
+    let userId = 1;
     if (isLiked === false) {
-      axios.post(`/comments/like/${commentId}`).then((response) => {
+      axios.post(`/comments/like/${commentId}/${userId}`).then((response) => {
         console.log(response);
         getDetail();
       });
     } else {
-      axios.post(`/comments/unlike/${commentId}`).then((response) => {
+      axios.post(`/comments/unlike/${commentId}/${userId}`).then((response) => {
         console.log(response);
         getDetail();
       });

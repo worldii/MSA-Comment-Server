@@ -36,11 +36,9 @@ public class CommentController {
 	@GetMapping("/comments/{postId}")
 	public ResponseEntity<ResultResponse> getComments(@PathVariable Long postId) {
 		List<Comment> allComments = commentService.findAllComments(postId);
-		for (int i = 0; i < allComments.size(); i++) {
-			log.info("description" + allComments.get(i).getUser().getUserName());
-		}
 		List<CommentDto> collect = allComments.stream()
-			.map(comment -> new CommentDto(comment.getId(),comment.getUser().getUserName(), comment.getUser().getProfilePicture(), comment.getDescription(),
+			.map(comment -> new CommentDto(comment.getId(), comment.getUser().getUserName(),
+				comment.getUser().getProfilePicture(), comment.getDescription(),
 				comment.getLikes()))
 			.collect(
 				Collectors.toList());
@@ -67,15 +65,17 @@ public class CommentController {
 		return ResponseEntity.ok(new ResultResponse(ResultCode.UPDATE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comments/like/{commentId}")
-	ResponseEntity<ResultResponse> addCommentLikes(@PathVariable("commentId") long commentId) {
-		commentService.addCommentLikes(commentId);
+	@PostMapping("/comments/like/{commentId}/{userId}")
+	ResponseEntity<ResultResponse> addCommentLikes(@PathVariable("commentId") long commentId,
+		@PathVariable("userId") long userId) {
+		commentService.addCommentLikes(commentId, userId);
 		return ResponseEntity.ok(new ResultResponse(ResultCode.LIKE_COMMENT_SUCCESS, ""));
 	}
 
-	@PostMapping("/comments/unlike/{commentId}")
-	ResponseEntity<ResultResponse> deleteCommentLikes(@PathVariable("commentId") long commentId) {
-		commentService.deleteCommentLikes(commentId);
+	@PostMapping("comments/unlike/{commentId}/{userId}")
+	ResponseEntity<ResultResponse> deleteCommentLikes(@PathVariable("commentId") long commentId,
+		@PathVariable("userId") long userId) {
+		commentService.deleteCommentLikes(commentId, userId);
 		return ResponseEntity.ok(new ResultResponse(ResultCode.UNLIKE_COMMENT_SUCCESS, ""));
 	}
 
@@ -85,16 +85,16 @@ public class CommentController {
 		List<CommentLikesDto> collect = commentLikesList.stream()
 			.map(comment -> new CommentLikesDto(comment.getUser().getUserName(), comment.getUser().getProfilePicture(),
 				comment.getUser().getFullName()))
-				.collect(
-					Collectors.toList());
+			.collect(
+				Collectors.toList());
 
 		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_LIKES_SUCCESS, collect));
 	}
 
-	@GetMapping("/comments/isLiked/{commentId}")
-	ResponseEntity<ResultResponse> getCommentisLikedByUser(@PathVariable ("commentId") long commentId)
-	{
-		boolean result = commentService.checkCommentIsLikedByUser(commentId);
-		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_IS_LIKED_SUCCESS,result));
+	@GetMapping("/comments/isLiked/{commentId}/{userId}")
+	ResponseEntity<ResultResponse> getCommentisLikedByUser(@PathVariable("commentId") long commentId,
+		@PathVariable("userId") long userId) {
+		boolean result = commentService.checkCommentIsLikedByUser(commentId, userId);
+		return ResponseEntity.ok(new ResultResponse(ResultCode.GET_COMMENT_IS_LIKED_SUCCESS, result));
 	}
 }

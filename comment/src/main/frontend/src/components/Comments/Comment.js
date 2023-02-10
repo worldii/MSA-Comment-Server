@@ -14,6 +14,7 @@ const Comment = ({ postId, refreshfunc }) => {
     event.preventDefault();
     let body = {
       description: comment,
+      userId: 1,
     };
     axios.post(`/comments/${postId}`, body).then((response) => {
       console.log(response);

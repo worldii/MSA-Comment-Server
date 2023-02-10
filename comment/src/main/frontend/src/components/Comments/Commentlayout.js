@@ -10,7 +10,7 @@ import axios from 'axios';
 
 function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
   const description = commentitem.description;
-  const user = commentitem.userName;
+  const userName = commentitem.userName;
   const commentId = commentitem?.id;
   const likes = commentitem.likes;
   const userProfileUrl = commentitem?.profileUrl;
@@ -28,7 +28,8 @@ function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
   };
 
   useEffect(() => {
-    axios.get(`/comments/isLiked/${commentId}`).then((response) => {
+    let userId = 1;
+    axios.get(`/comments/isLiked/${commentId}/${userId}`).then((response) => {
       console.log(response.data.data);
       setIsLiked(JSON.parse(response.data.data));
     });
@@ -66,7 +67,7 @@ function Commentlayout({ commentitem, toggleLikeMutation, deleteFunc }) {
           </div>
           <div className={styles.contentLayout}>
             <div className={styles.content}>
-              <div className={styles.userName}>{user.userName}</div>
+              <div className={styles.userName}>{userName}</div>
               <div className={styles.description}>{description}</div>
             </div>
             <div className={styles.detail}>

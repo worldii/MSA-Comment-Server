@@ -11,8 +11,8 @@ import com.example.comment.domain.User;
 import com.example.comment.dto.CommentCreateDto;
 import com.example.comment.dto.CommentDto;
 import com.example.comment.dto.CommentResponseData;
-import com.example.comment.exception.CommentException;
-import com.example.comment.exception.CommentExceptionType;
+import com.example.comment.exception.CustomException;
+import com.example.comment.exception.ErrorCode;
 import com.example.comment.repository.CommentLikesRepository;
 import com.example.comment.repository.CommentRepository;
 import com.example.comment.repository.UserRepository;
@@ -29,32 +29,31 @@ public class CommentService {
 	private final CommentLikesRepository commentLikesRepository;
 	private final CommentMentionService commentMentionService;
 
-	// 생성
+	@Transactional(readOnly = true)
+	public List<Comment> findAllComments(Long postId) {
+		return commentRepository.findAllByPostId(postId);
+	}
+
 	@Transactional
 	public CommentResponseData createComment(Long postId, CommentCreateDto commentCreateDto) {
-		// 1. Post Service 에서 postId가 있는 지 확인. Exception 처리도 해줘야 함. (Refactoring)
+		// Refactoring 할 것.
+		// 1. Post Service 에서 postId가 있는 지 확인. Exception 처리도 해줘야 함.(Post 서비스)
+		// 2. User Service 에서 로그인 한 user server 있는 지 확인.  Exception 처리도 해줘야 함. (User 서비스)
+		// 3. Notification Service 에 보냄.
 
-		// 2. User Service 에서 user server 있는 지 확인.  Exception 처리도 해줘야 함. commentDto 의 user id 를 통해 User 를 찾고 comment 에 등록 해줌.
-		// 현재 로그인 한 유저를 가져옴 (from UserService)
-		// 지금은 dummy data 로 대신함.
-		log.info("CreateComment 가 호출 되었습니다.");
-		User tempUser = new User();
-		tempUser.setId(1L);
-		tempUser.setUserName("Jongha");
-		tempUser.setFullName("park");
-		userRepository.save(tempUser);
+		log.info("comment create");
+		User tempUser = userRepository.findById(commentCreateDto.getUserId())
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
 		Comment comment = Comment.builder()
-			.user(tempUser) // 바꿔줘야 함.
+			.user(tempUser)
 			.description(commentCreateDto.getDescription())
 			.postId(postId).build();
 		commentRepository.save(comment);
 
-		// 5.  mention Service 에 멘션함.
+		log.info("Mention Someone");
 		commentMentionService.mentionMember(tempUser, comment);
 
-		// 6.  Notification Service 에 보냄. (for Refactoring )
-
-		// Response Data 보냄.
 		CommentResponseData commentResponseData = CommentResponseData.builder()
 			.id(comment.getId())
 			.createdAt(comment.getCreatedAt())
@@ -64,23 +63,13 @@ public class CommentService {
 		return commentResponseData;
 	}
 
-	@Transactional(readOnly = true)
-	public List<Comment> findAllComments(Long postId) {
-		return commentRepository.findAllByPostId(postId);
-	}
-
 	@Transactional
 	public void deleteComment(Long commentId) {
-		// 1. comment 없을 때 ERROR 처리 해줌. (ok)
+		// Refactoring
+		// delete하는 comment의 User와 login 한 User 가 같아야 함.-> Error 처리. (User Server)
 		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CommentException(CommentExceptionType.NOT_FOUND_COMMENT));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 
-		// 2. delete 하는 User 와 login 한 User 가 같아야 함.-> Error 처리. (User Server 관련하여 Refactoring 필요)
-		// if (member != comment.getUser()) Exception 처리.
-		// User tempUser = new User();
-		// if (!tempUser.getId().equals(comment.getUser().getId())) {throw new RuntimeException();}
-
-		// 3. comments Likes 다 없애야 함. (OK)
 		this.deleteCommentLikesAll(comment);
 		commentMentionService.deleteMentionAll(comment);
 		commentRepository.delete(comment);
@@ -88,78 +77,68 @@ public class CommentService {
 
 	@Transactional
 	public void updateComment(Long commentId, CommentDto commentDto) {
-		// 1.  comment 없을 때 (ok)
+		// Refactoring
+		// 댓글 쓰려는 유저가 맞지 않을 때 -> from user server.
 		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CommentException(CommentExceptionType.NOT_FOUND_COMMENT));
-
-		// 2. 댓글 쓰려는 유저가 맞지 않을 때 -> from user server.  Refactoring 해야 함.
-		// if (member != comment.getUser()) Exception 처리.
-		// User tempUser = new User();
-		// if (!tempUser.getId().equals(comment.getUser().getId())) {throw new RuntimeException();}
-
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 		comment.update(commentDto.getDescription());
 	}
 
 	@Transactional
-	public void addCommentLikes(Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CommentException(CommentExceptionType.NOT_FOUND_COMMENT));
-
+	public void addCommentLikes(Long commentId, Long userId) {
+		// Refactoring 필요
 		// 1. 현재 로그인 한 유저를 가져옴 (from UserService) (Refactoring 해야 함.)
-		// dummy data 로 대신함.
-		User tempUser = new User();
-		tempUser.setId(1L);
-		tempUser.setUserName("Jongha");
-		tempUser.setFullName("park");
+		// 2. Notification 서비스 보내기. ( Notification refactoring)
 
-		// 2. 에러 고치기 (refactoring), 이미 존재하니까 오류처리 해줘야 함.  (Refactoring 해야 함.)
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
+		User tempUser = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
 		if (commentLikesRepository.findByUserAndComment(tempUser, comment).isPresent()) {
-			throw new RuntimeException();
+			throw new CustomException(ErrorCode.COMMENT_ALREADY_EXIST);
 		}
 
 		comment.increaseLikes();
 		CommentLikes commentLikes = CommentLikes.builder().comment(comment).user(tempUser).build();
 		commentLikesRepository.save(commentLikes);
-		// 3. Notification 서비스 보내기. ( Notification refactoring)
 	}
 
 	@Transactional
-	public void deleteCommentLikes(Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CommentException(CommentExceptionType.NOT_FOUND_COMMENT));
-
+	public void deleteCommentLikes(Long commentId, Long userId) {
+		// for Refactoring
 		// 1. 현재 로그인 한 유저를 가져옴 (from UserService)
-		// dummy data 로 대신함.
-		User tempUser = new User();
-		tempUser.setId(1L);
-		tempUser.setUserName("Jongha");
-		tempUser.setFullName("park");
+		// 2. Notification 보내기 ( to Notification service) -> Refactoring
 
-		// 2. 에러 고치기 (refactoring)
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
+
+		User tempUser = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
 		CommentLikes commentLikes = commentLikesRepository.findByUserAndComment(tempUser, comment)
-			.orElseThrow(() -> new RuntimeException());
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 
 		comment.decreaseLikes();
 		commentLikesRepository.delete(commentLikes);
-		// 3. Notification 보내기 ( to Notification service) -> Refactoring
 	}
 
-	public List<CommentLikes> getCommentLikesList(long commentId){
+	@Transactional
+	public List<CommentLikes> getCommentLikesList(long commentId) {
 		List<CommentLikes> allByCommentId = commentLikesRepository.findAllByCommentId(commentId);
-		log.info("좋아요 리스트 "+ allByCommentId);
-
+		log.info("좋아요 리스트 " + allByCommentId);
 		return allByCommentId;
+	}
+
+	@Transactional
+	public boolean checkCommentIsLikedByUser(long commentId, long userId) {
+		boolean present = commentLikesRepository.findByUserIdAndCommentId(userId, commentId).isPresent();
+		log.info("좋아요 여부 "+ present);
+		return present;
 	}
 
 	private void deleteCommentLikesAll(Comment comment) {
 		List<CommentLikes> allByComment = commentLikesRepository.findAllByComment(comment);
 		commentLikesRepository.deleteAll(allByComment);
 	}
-	public boolean checkCommentIsLikedByUser(long commentId)
-	{
-		// user id 알아내서 넣어야 함. -> 지금은 일단 1로
-		boolean present = commentLikesRepository.findByUserIdAndCommentId(1, commentId).isPresent();
-		return present;
-	}
-
 }
