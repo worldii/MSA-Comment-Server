@@ -10,5 +10,5 @@ import com.example.comment.domain.CommentMention;
 
 @Repository
 public interface CommentMentionRepository extends JpaRepository<CommentMention, Long> {
-	List<CommentMention> findAllByComment(Comment comment);
+	List<CommentMention> findAllByCommentId(Long commentId);
 }

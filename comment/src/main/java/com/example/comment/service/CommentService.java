@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.comment.domain.Comment;
 import com.example.comment.domain.CommentLikes;
-import com.example.comment.domain.User;
 import com.example.comment.dto.CommentCreateDto;
 import com.example.comment.dto.CommentDto;
 import com.example.comment.dto.CommentResponseData;
@@ -15,7 +14,6 @@ import com.example.comment.exception.CustomException;
 import com.example.comment.exception.ErrorCode;
 import com.example.comment.repository.CommentLikesRepository;
 import com.example.comment.repository.CommentRepository;
-import com.example.comment.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommentService {
 	private final CommentRepository commentRepository;
-	private final UserRepository userRepository;
 	private final CommentLikesRepository commentLikesRepository;
 	private final CommentMentionService commentMentionService;
 
@@ -36,30 +33,24 @@ public class CommentService {
 
 	@Transactional
 	public CommentResponseData createComment(Long postId, CommentCreateDto commentCreateDto) {
-		// Refactoring 할 것.
-		// 1. Post Service 에서 postId가 있는 지 확인. Exception 처리도 해줘야 함.(Post 서비스)
-		// 2. User Service 에서 로그인 한 user server 있는 지 확인.  Exception 처리도 해줘야 함. (User 서비스)
-		// 3. Notification Service 에 보냄.
-
+		// Notification Service 에 보냄. -> Refactoring
 		log.info("comment create");
-		User tempUser = userRepository.findById(commentCreateDto.getUserId())
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		Comment comment = Comment.builder()
-			.user(tempUser)
+			.userId(commentCreateDto.getUserId())
 			.description(commentCreateDto.getDescription())
 			.postId(postId).build();
 		commentRepository.save(comment);
 
 		log.info("Mention Someone");
-		commentMentionService.mentionMember(tempUser, comment);
-
+		commentMentionService.mentionMember(commentCreateDto.getUserId(), commentCreateDto);
 		CommentResponseData commentResponseData = CommentResponseData.builder()
 			.id(comment.getId())
 			.createdAt(comment.getCreatedAt())
-			.from(comment.getUser())
+			.userId(comment.getUserId())
 			.description(comment.getDescription())
 			.build();
+
 		return commentResponseData;
 	}
 
@@ -70,8 +61,8 @@ public class CommentService {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 
-		this.deleteCommentLikesAll(comment);
-		commentMentionService.deleteMentionAll(comment);
+		this.deleteCommentLikesAll(commentId);
+		commentMentionService.deleteMentionAll(commentId);
 		commentRepository.delete(comment);
 	}
 
@@ -92,15 +83,13 @@ public class CommentService {
 
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
-		User tempUser = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-		if (commentLikesRepository.findByUserAndComment(tempUser, comment).isPresent()) {
+		if( commentLikesRepository.findByUserIdAndCommentId(userId, commentId).isPresent())
+		{
 			throw new CustomException(ErrorCode.COMMENT_ALREADY_EXIST);
 		}
 
 		comment.increaseLikes();
-		CommentLikes commentLikes = CommentLikes.builder().comment(comment).user(tempUser).build();
+		CommentLikes commentLikes = CommentLikes.builder().commentId(commentId).userId(userId).build();
 		commentLikesRepository.save(commentLikes);
 	}
 
@@ -113,10 +102,7 @@ public class CommentService {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 
-		User tempUser = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-		CommentLikes commentLikes = commentLikesRepository.findByUserAndComment(tempUser, comment)
+		CommentLikes commentLikes = commentLikesRepository.findByUserIdAndCommentId(userId, commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
 
 		comment.decreaseLikes();
@@ -137,8 +123,8 @@ public class CommentService {
 		return present;
 	}
 
-	private void deleteCommentLikesAll(Comment comment) {
-		List<CommentLikes> allByComment = commentLikesRepository.findAllByComment(comment);
+	private void deleteCommentLikesAll(Long commentId) {
+		List<CommentLikes> allByComment = commentLikesRepository.findAllByCommentId(commentId);
 		commentLikesRepository.deleteAll(allByComment);
 	}
 }

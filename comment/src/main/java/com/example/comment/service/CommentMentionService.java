@@ -7,16 +7,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.example.comment.dto.CommentCreateDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.comment.domain.Comment;
 import com.example.comment.domain.CommentMention;
-import com.example.comment.domain.User;
-import com.example.comment.exception.CustomException;
-import com.example.comment.exception.ErrorCode;
 import com.example.comment.repository.CommentMentionRepository;
-import com.example.comment.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,29 +22,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommentMentionService {
 	private final CommentMentionRepository commentMentionRepository;
-	private final UserRepository userRepository;
-
 	@Transactional
-	public void mentionMember(User user, Comment comment) {
-		List<String> username = extractUsernameFromString(comment.getDescription());
+	public void mentionMember(Long userId, CommentCreateDto commentCreateDto) {
+		List<String> username = extractUsernameFromString(commentCreateDto.getDescription());
 		log.info("USERNAME 멘션" + username);
 
 		// Refactoring 해야 함. User Server 에서 가져올 수 있게.
-		List<User> allByUserName = userRepository.findByUserNameIn(username);
-
+		// API 요청으로 username 에 해당하는 user id 가져옴.
 		for (int i = 0; i < username.size(); i++) {
-			CommentMention commentMention = CommentMention.builder()
-				.sender(user)
-				.receiver(allByUserName.get(i))
-				.comment(comment)
-				.build();
+			CommentMention commentMention = CommentMention.builder().receiverId(userId)
+				.senderId(userId).build();
 			commentMentionRepository.save(commentMention);
 		}
 	}
 
 	@Transactional
-	public void deleteMentionAll(Comment comment) {
-		List<CommentMention> allByComment = commentMentionRepository.findAllByComment(comment);
+	public void deleteMentionAll(Long commentId) {
+		List<CommentMention> allByComment = commentMentionRepository.findAllByCommentId(commentId);
 		commentMentionRepository.deleteAll(allByComment);
 	}
 
@@ -59,7 +49,7 @@ public class CommentMentionService {
 		final Matcher matcher = pattern.matcher(input);
 		while (matcher.find()) {
 			// 존재 여부 판단해야 함 ( from  User Service ) -> Refactoring
-			userRepository.findByUserName(matcher.group().substring(1)).orElseThrow(()->new CustomException(ErrorCode.MENTION_USER_NOT_FOUND));
+			//userRepository.findByUserName(matcher.group().substring(1)).orElseThrow(()->new CustomException(ErrorCode.MENTION_USER_NOT_FOUND));
 			mentions.add(matcher.group().substring(1));
 		}
 		return new ArrayList<>(mentions);

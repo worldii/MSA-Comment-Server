@@ -8,12 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import com.example.comment.domain.Comment;
 import com.example.comment.domain.CommentLikes;
-import com.example.comment.domain.User;
 
 @Repository
 public interface CommentLikesRepository extends JpaRepository<CommentLikes, Long> {
-	Optional<CommentLikes> findByUserAndComment(User user, Comment comment);
-	Optional<CommentLikes> findByUserIdAndCommentId( long userId,long  commentId);
-	List<CommentLikes> findAllByCommentId(long commentId);
-	List<CommentLikes> findAllByComment(Comment comment);
+	Optional<CommentLikes> findByUserIdAndCommentId(Long userId,Long  commentId);
+	List<CommentLikes> findAllByCommentId(Long commentId);
 }
